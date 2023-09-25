@@ -1,0 +1,81 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Scanner;
+
+public class SignupExample {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Database connection parameters
+        String jdbcUrl = "jdbc:mysql://localhost:3306/your_database_name";
+        String dbUsername = "your_db_username";
+        String dbPassword = "your_db_password";
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            // 1. Load the MySQL JDBC driver
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+            // 2. Establish a database connection
+            connection = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
+
+            // Disable auto-commit to start a transaction
+            connection.setAutoCommit(false);
+
+            // 3. Collect user input for signup
+            System.out.println("User Signup\n");
+
+            System.out.print("Enter your username: ");
+            String username = scanner.nextLine();
+
+            System.out.print("Enter your password: ");
+            String password = scanner.nextLine();
+
+            // 4. Create an SQL query to insert a new user
+            String sqlQuery = "INSERT INTO users (username, password) VALUES (?, ?)";
+
+            // 5. Prepare the SQL statement
+            preparedStatement = connection.prepareStatement(sqlQuery);
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+
+            // 6. Execute the SQL query to insert the new user
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            // 7. Commit the transaction if the signup is successful
+            if (rowsAffected > 0) {
+                connection.commit();
+                System.out.println("\nSignup successful!");
+            } else {
+                System.out.println("\nSignup failed. Please try again.");
+            }
+
+        } catch (ClassNotFoundException | SQLException e) {
+            try {
+                // 8. Rollback the transaction in case of an exception
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException rollbackException) {
+                rollbackException.printStackTrace();
+            }
+            e.printStackTrace();
+        } finally {
+            try {
+                // 9. Close resources (PreparedStatement and Connection)
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException closeException) {
+                closeException.printStackTrace();
+            }
+        }
+    }
+}
