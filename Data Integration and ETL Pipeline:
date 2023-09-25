@@ -1,0 +1,55 @@
+#Data Integration and ETL Pipeline:#
+import pandas as pd
+import psycopg2
+from sqlalchemy import create_engine
+
+# Step 1: Extract data from CSV files
+def extract_data_from_csv(csv_file_path):
+    try:
+        df = pd.read_csv(csv_file_path)
+        return df
+    except Exception as e:
+        print(f"Error extracting data from CSV: {str(e)}")
+        return None
+
+# Step 2: Transform and clean the data (example transformation)
+def transform_data(data_frame):
+    try:
+        # Perform data transformations here
+        # Example: Drop rows with missing values
+        data_frame = data_frame.dropna()
+        return data_frame
+    except Exception as e:
+        print(f"Error transforming data: {str(e)}")
+        return None
+
+# Step 3: Load data into a PostgreSQL database
+def load_data_to_postgres(data_frame, table_name, connection_string):
+    try:
+        engine = create_engine(connection_string)
+        data_frame.to_sql(table_name, engine, if_exists='replace', index=False)
+        print("Data loaded into PostgreSQL successfully.")
+    except Exception as e:
+        print(f"Error loading data into PostgreSQL: {str(e)}")
+
+def main():
+    # Configuration
+    csv_file_path = 'source_data.csv'  # Replace with your CSV file path
+    table_name = 'destination_table'  # Replace with your desired table name
+    connection_string = 'postgresql://username:password@localhost:5432/database'  # Replace with your database connection details
+
+    # Step 1: Extract data from CSV
+    extracted_data = extract_data_from_csv(csv_file_path)
+
+    if extracted_data is not None:
+        # Step 2: Transform and clean the data
+        transformed_data = transform_data(extracted_data)
+
+        if transformed_data is not None:
+            # Step 3: Load data into PostgreSQL
+            load_data_to_postgres(transformed_data, table_name, connection_string)
+
+if __name__ == '__main__':
+    main()
+
+
