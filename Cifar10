@@ -1,0 +1,195 @@
+Number of Fundings
+import csv
+import matplotlib.pyplot as plt
+
+import collections
+with open('startup_funding.csv', encoding ='UTF-8') as file_obj:
+    file_data = csv.DictReader(file_obj, skipinitialspace=True)
+
+    dct = {}
+    for row in file_data:
+        year = row['Date'][-4:]
+        if year in dct:
+            dct[year] += 1
+        else:
+            dct[year] = 1
+            
+    ord_dct = collections.OrderedDict(sorted(dct.items()))                                  
+    plt.plot(list(ord_dct.keys()),list(ord_dct.values()))
+    plt.xlabel("Year")
+    plt.ylabel("Number of Fundings")
+    plt.title('Year VS "Number of Fundings"')
+    plt.show()
+    
+    for i in ord_dct.keys():
+        print(i,end=" ")
+        print(ord_dct[i])
+Top Indian Cities
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+
+df = pd.read_csv('startup_funding.csv',encoding = 'utf-8')
+#df['CityLocation'].dropna(inplace=True)
+df.dropna(subset=["CityLocation"],inplace=True)
+#df.tail()
+def separateCity(city): 
+    return city.split('/')[0].strip() 
+df['CityLocation']=df['CityLocation'].apply(separateCity) 
+df[df['CityLocation']=='bangalore'] = 'Bangalore'
+df[df['CityLocation']=='Delhi'] = 'New Delhi'
+
+city = df['CityLocation']
+city = city.value_counts()[:10]
+city_name = city.index
+no_of_str = city.values
+
+plt.pie(no_of_str, labels=city_name, autopct='%.2f%%',counterclock=False)
+plt.title('Number of startup in city')
+plt.axis("equal")
+plt.show()
+
+for i in range(city_name.shape[0]):
+    print(city_name[i],no_of_str[i])
+Funding amount
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+
+df = pd.read_csv('startup_funding.csv',encoding = 'utf-8')
+df.dropna(subset=["CityLocation"],inplace=True)
+def separateCity(city):
+    return city.split('/')[0].strip()
+df['CityLocation'] = df['CityLocation'].apply(separateCity)
+df['CityLocation'].replace("Delhi","New Delhi",inplace = True)
+df['CityLocation'].replace("bangalore","Bangalore",inplace = True)
+
+df['AmountInUSD'] = df['AmountInUSD'].apply(lambda x: float(str(x).replace(",","")))
+df = df.groupby('CityLocation')['AmountInUSD'].sum()
+df = df.sort_values(ascending = False)[0:10]
+city = df.index
+amount = df.values
+explode = [0.2,0.2,0.2,0.2,0.1,0.1,0.2,0.2,0.2,0.2]
+plt.pie(amount,labels = city,autopct='%0.2f',counterclock=False,startangle=90,explode =explode,radius=1.5)
+plt.show()
+
+percent = np.true_divide(amount,amount.sum())*100
+for i in range(len(city)):
+    print(city[i],format(percent[i],'0.2f'))
+Investment Type
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
+df = pd.read_csv('startup_funding.csv',encoding = 'utf-8')
+df['InvestmentType'].replace('SeedFunding','Seed Funding',inplace = True)
+df['InvestmentType'].replace('PrivateEquity','Private Equity',inplace = True)
+df['InvestmentType'].replace('DebtFunding','Debt Funding',inplace = True)
+df['InvestmentType'].replace('Crowd funding','Crowd Funding',inplace = True)
+df['AmountInUSD'] = df['AmountInUSD'].apply(lambda x: float(str(x).replace(",","")))
+
+df = df.groupby('InvestmentType')['AmountInUSD'].sum()
+df = df.sort_values(ascending = False)[:10]
+investment = df.index
+amount = df.values
+
+plt.pie(amount,labels = investment,autopct='%0.2f',counterclock=False,startangle=110)
+plt.show()
+
+percent = np.true_divide(amount,amount.sum())*100
+for i in range(len(investment)):
+    print(investment[i],format(percent[i],'0.2f'))
+Top Industries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+df = pd.read_csv('startup_funding.csv',encoding = 'utf-8')
+df['IndustryVertical'].replace('ECommerce','Ecommerce',inplace = True)
+df['IndustryVertical'].replace('eCommerce','Ecommerce',inplace = True)
+df['IndustryVertical'].replace('ecommerce','Ecommerce',inplace = True)
+df['AmountInUSD'] = df['AmountInUSD'].apply(lambda x: float(str(x).replace(",","")))
+df = df.groupby('IndustryVertical')['AmountInUSD'].sum()
+df = df.sort_values(ascending = False)[:5]
+industry = df.index
+amount = df.values
+
+plt.pie(amount,labels = industry,autopct='%0.2f',counterclock=False,startangle=100)
+plt.show()
+percent = np.true_divide(amount,amount.sum())*100
+for i in range(len(industry)):
+    print(industry[i],format(percent[i],'0.2f'))
+Top startups
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+df = pd.read_csv('startup_funding.csv',encoding = 'utf-8')
+df['IndustryVertical'].replace('ECommerce','Ecommerce',inplace = True)
+df['IndustryVertical'].replace('eCommerce','Ecommerce',inplace = True)
+df['IndustryVertical'].replace('ecommerce','Ecommerce',inplace = True)
+df['AmountInUSD'] = df['AmountInUSD'].apply(lambda x: float(str(x).replace(",","")))
+df = df.groupby('IndustryVertical')['AmountInUSD'].sum()
+df = df.sort_values(ascending = False)[:5]
+industry = df.index
+amount = df.values
+
+plt.pie(amount,labels = industry,autopct='%0.2f',counterclock=False,startangle=100)
+plt.show()
+percent = np.true_divide(amount,amount.sum())*100
+for i in range(len(industry)):
+    print(industry[i],format(percent[i],'0.2f'))
+Funding rounds
+import pandas as pd
+import numpy as np
+import collections
+
+df = pd.read_csv('startup_funding.csv',encoding = 'utf-8')
+df.InvestorsName.fillna("",inplace = True)
+investors = df.InvestorsName
+
+investors_name = []
+for i in investors:
+    if i != "":
+        temp = i.split(",")
+        for j in temp:
+            investors_name.append(j.strip())
+dct = {}
+for i in investors_name:
+    dct[i] = dct.get(i,0) + 1
+for i in dct:
+    print(max(1))
+Top Investor
+import pandas as pd
+import numpy as np
+
+df = pd.read_csv('startup_funding.csv',encoding = 'utf-8')
+df['InvestorsName'].dropna(inplace = True)
+
+def createDict(array):
+    dictionary = {}
+    for i in array:
+        if ',' not in i:
+            if i in dictionary:
+                dictionary[i] = dictionary.get(i)+1
+                
+            else:
+                dictionary[i] = 1
+        else:
+            string = i.strip().split(',')
+            for j in string:
+                if j.strip() in dictionary:
+                    dictionary[j.strip()] = dictionary.get(j.strip()) +1
+                else:
+                    dictionary[j.strip()] = 1
+    return dictionary
+
+dictionary = createDict(df['InvestorsName'])
+dataf = pd.DataFrame(list(dictionary.values()),list(dictionary.keys()))
+dataf = dataf.sort_values(by = [0], ascending = False)
+print(dataf.index[0],dataf.values[0][0])
